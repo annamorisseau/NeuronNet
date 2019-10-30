@@ -128,3 +128,37 @@ void Network::print_traj(const int time, const std::map<std::string, size_t> &_n
             }
     (*_out) << std::endl;
 }
+
+std::pair<size_t, double> Network::degree(const size_t &n) const{
+	size_t nb_connec(0);
+	double intens(0);
+	//pour tous les elements de la map on teste si le neurone n est le neurone incoming
+	std::map<std::pair<size_t, size_t>, double>::const_iterator it = links.begin();
+	while (it != links.end()){ //ou do while pour tester le dernier element de la map?
+		if((std::get<0>(it->first) == n)) //verifier que les deux neurones ne sont pas les memes? -- pas necessaire car dans add link
+		{nb_connec ++;
+		intens += (it->second); 	
+			}
+		it++;
+		}
+	/*std::pair<size_t, double> result(nb_connec, intens);*/ //revoir initialisation d'un pair : make_pair ?
+	
+	return std::make_pair(nb_connec,intens);
+	}
+
+std::vector<std::pair<size_t, double> > Network::neighbors(const size_t &n) const{
+	std::vector<std::pair<size_t, double> > voisins;
+	std::map<std::pair<size_t, size_t>, double>::const_iterator it = links.begin();
+	while (it != links.end()){
+		if((std::get<0>(it->first) == n)){ // si le incomming neurone est n
+			voisins.push_back(std::make_pair(std::get<1>(it->first), (it->second))); // on ajoute le deuxieme element du pair et l'intensite du link au tableau
+			}
+		}
+	return voisins;
+	}
+
+std::set<size_t> Network::step(const std::vector<double> &input){}
+
+//utilise neighbor??
+
+//{}
