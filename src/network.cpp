@@ -157,8 +157,62 @@ std::vector<std::pair<size_t, double> > Network::neighbors(const size_t &n) cons
 	return voisins;
 	}
 
-std::set<size_t> Network::step(const std::vector<double> &input){}
+/*std::set<size_t> Network::step(const std::vector<double> &input){
+	if( input.size() != neurons.size()){} // verifier que l'input thalamique est de la meme taille que le tableau de neurone
+	for (size_t i(0), i< neurons.size(), ++i){ // iteration sur chaque neurone du network
+		std::vector<std::pair<size_t, double> > voisins(neighbors(i));/ // on recupere la liste des voisins de i
+		for(auto neighbors(i) 
+		for(size_t j(0), j< voisins.size(), ++j){}
+		}
+	}*/
+	
+std::set<size_t> Network::step(const std::vector<double> &input){
+	/*if( input.size() != neurons.size()){}*/ // verifier que l'input thalamique est de la meme taille que le tableau de neurone
+	std::set<size_t> firing_neurons;
+	double intensite(0);
+	size_t n(0); //indice du neurone en cours
+	for (auto& neuron : neurons){ // iteration sur chaque neurone du network
+		std::vector<std::pair<size_t, double> > neighbor_firing;
+		for(auto& voisins : neighbors(n)){ // liste de voisins du neurone n = pour chaque voisin du neurone n
+			size_t neuron_index =  (std::get<0>(voisins)); //variable locale
+			if (neurons[neuron_index].firing()){ // fonction firing est un bool --> true si firing
+				neighbor_firing.push_back(voisins);
+				} // on a une liste de voisins firing avec intensite du lien avec n
+			}
+		for(auto& firing : neighbor_firing){
+			size_t neuron_index =  (std::get<0>(firing));
+			if(neurons[neuron_index].is_inhibitory()){intensite -= std::get<1>(firing);}
+			else{intensite += 0.5 * (std::get<1>(firing));} // un demi de l'intensite ? seulement pour excitateurs ?
+			}
+			
+		if(neuron.is_inhibitory()){intensite += 0.4*input[n];}
+		else {intensite += input[n];}
+		// on a l'intensite recue par le neurone
+		
+		neuron.input(intensite);
+		neuron.step();
+		
+		if( neuron.firing() )
+		{	
+			firing_neurons.insert(n);
+		} //si le neurone d'indice n en cours est firing il est ajouté au set resultat
+		
+		n++; // augmente de 1 l'indice du neurone pour la prochaine iteration
+		intensite =0; // reset de la variable intensite pour la prochaine iteration sur le prochain neurone
+		} //on finit d'abord l'iteration globale sur les neurones donc ceux qui sont firing le reste
+		
+		
+		/*
+		for (auto& neuron : neurons){
+		if(neuron.potential() > _FIRING_TH_ ) // ou alors directement is_firing()
+		{	
+			neuron.reset();
+			}
+			}*/
+			
+			return firing_neurons;
+	}
 
 //utilise neighbor??
 
-//{}
+//{} //[] // /*  */
