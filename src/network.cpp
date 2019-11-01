@@ -132,17 +132,12 @@ void Network::print_traj(const int time, const std::map<std::string, size_t> &_n
 std::pair<size_t, double> Network::degree(const size_t &n) const{
 	size_t nb_connec(0);
 	double intens(0);
-	//pour tous les elements de la map on teste si le neurone n est le neurone incoming
-	std::map<std::pair<size_t, size_t>, double>::const_iterator it = links.begin();
-	while (it != links.end()){ //ou do while pour tester le dernier element de la map?
-		if((std::get<0>(it->first) == n)) //verifier que les deux neurones ne sont pas les memes? -- pas necessaire car dans add link
-		{nb_connec ++;
+	for(std::map<std::pair<size_t, size_t>, double>::const_iterator it = links.begin(); it != links.end(); ++it){
+		if((std::get<0>(it->first) == n))
+		{nb_connec++;
 		intens += (it->second); 	
 			}
-		it++;
 		}
-	/*std::pair<size_t, double> result(nb_connec, intens);*/ //revoir initialisation d'un pair : make_pair ?
-	
 	return std::make_pair(nb_connec,intens);
 	}
 
@@ -150,69 +145,56 @@ std::vector<std::pair<size_t, double> > Network::neighbors(const size_t &n) cons
 	std::vector<std::pair<size_t, double> > voisins;
 	std::map<std::pair<size_t, size_t>, double>::const_iterator it = links.begin();
 	while (it != links.end()){
-		if((std::get<0>(it->first) == n)){ // si le incomming neurone est n
-			voisins.push_back(std::make_pair(std::get<1>(it->first), (it->second))); // on ajoute le deuxieme element du pair et l'intensite du link au tableau
+		if((std::get<0>(it->first) == n)){
+			voisins.push_back(std::make_pair(std::get<1>(it->first), (it->second)));
 			}
 		}
 	return voisins;
 	}
 
-/*std::set<size_t> Network::step(const std::vector<double> &input){
-	if( input.size() != neurons.size()){} // verifier que l'input thalamique est de la meme taille que le tableau de neurone
-	for (size_t i(0), i< neurons.size(), ++i){ // iteration sur chaque neurone du network
-		std::vector<std::pair<size_t, double> > voisins(neighbors(i));/ // on recupere la liste des voisins de i
-		for(auto neighbors(i) 
-		for(size_t j(0), j< voisins.size(), ++j){}
-		}
-	}*/
+		
 	
-std::set<size_t> Network::step(const std::vector<double> &input){
-	/*if( input.size() != neurons.size()){}*/ // verifier que l'input thalamique est de la meme taille que le tableau de neurone
+std::set<size_t> Network::step(const std::vector<double> &thalamic){
+	
+	std::vector<bool> neurons_previously_firing(neurons.size(), false);
+	for (size_t n(0); n<neurons.size(); ++n){
+		if(neurons[n].firing()){
+			neurons_previously_firing[n] = true;
+			neurons[n].reset();}
+		}
+	
 	std::set<size_t> firing_neurons;
 	double intensite(0);
-	size_t n(0); //indice du neurone en cours
-	for (auto& neuron : neurons){ // iteration sur chaque neurone du network
+	
+	for (size_t n(0); n<neurons.size(); ++n){
 		std::vector<std::pair<size_t, double> > neighbor_firing;
-		for(auto& voisins : neighbors(n)){ // liste de voisins du neurone n = pour chaque voisin du neurone n
-			size_t neuron_index =  (std::get<0>(voisins)); //variable locale
-			if (neurons[neuron_index].firing()){ // fonction firing est un bool --> true si firing
+		for(auto& voisins : neighbors(n)){
+			size_t neuron_index =  (std::get<0>(voisins));
+			if (neurons_previously_firing[neuron_index]){
 				neighbor_firing.push_back(voisins);
-				} // on a une liste de voisins firing avec intensite du lien avec n
+				}
 			}
 		for(auto& firing : neighbor_firing){
 			size_t neuron_index =  (std::get<0>(firing));
-			if(neurons[neuron_index].is_inhibitory()){intensite -= std::get<1>(firing);}
-			else{intensite += 0.5 * (std::get<1>(firing));} // un demi de l'intensite ? seulement pour excitateurs ?
+			if(neurons[neuron_index].is_inhibitory()){intensite += std::get<1>(firing);}
+			else{intensite += 0.5 * (std::get<1>(firing));}
 			}
 			
-		if(neuron.is_inhibitory()){intensite += 0.4*input[n];}
-		else {intensite += input[n];}
-		// on a l'intensite recue par le neurone
+		if(neurons[n].is_inhibitory()){intensite += 0.4*thalamic[n];}
+		else {intensite += thalamic[n];}
 		
-		neuron.input(intensite);
-		neuron.step();
+		neurons[n].input(intensite);
+		neurons[n].step();
 		
-		if( neuron.firing() )
+		if( neurons[n].firing() )
 		{	
 			firing_neurons.insert(n);
-		} //si le neurone d'indice n en cours est firing il est ajouté au set resultat
-		
-		n++; // augmente de 1 l'indice du neurone pour la prochaine iteration
-		intensite =0; // reset de la variable intensite pour la prochaine iteration sur le prochain neurone
-		} //on finit d'abord l'iteration globale sur les neurones donc ceux qui sont firing le reste
-		
-		
-		/*
-		for (auto& neuron : neurons){
-		if(neuron.potential() > _FIRING_TH_ ) // ou alors directement is_firing()
-		{	
-			neuron.reset();
-			}
-			}*/
+		}
+		 
+		intensite =0;
+		}
+
 			
 			return firing_neurons;
 	}
 
-//utilise neighbor??
-
-//{} //[] // /*  */

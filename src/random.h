@@ -39,7 +39,7 @@ public:
   This takes a vector of indices and re-orders it randomly.
  */
 ///@{
-    void shuffle(std::vector<size_t> &_v) {std::shuffle(_v.begin(), _v.end(), rng);}
+    void shuffle(std::vector<size_t> &_v){std::shuffle(_v.begin(), _v.end(), rng);}
 ///@}
      
 private:
